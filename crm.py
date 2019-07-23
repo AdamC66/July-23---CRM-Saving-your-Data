@@ -33,49 +33,56 @@ class CRM:
     else:
       print("selection invalid")
   def add_new_contact(self):
-    first_name = input("Please enter contact's first name: ").lower()
-    last_name = input("Please enter contact's last name: ").lower()
+    first_name = input("Please enter contact's first name: ")
+    last_name = input("Please enter contact's last name: ")
     email = input("Please enter contact's email address: ").lower()
     note = input("Please enter a note for the contact, if desired: ")
-    if note == None:
-      note = " "    
-    Contact.create(first_name, last_name, email,note)
-
+    contact = Contact.create(
+      first_name=first_name,
+      last_name=last_name,
+      email=email,
+      note=note
+    )
   def modify_existing_contact(self):
-    if len(Contact.list_of_contacts) == 0:
-      print("Error, no contacts to modify")
-    else:
-      id_to_update = int(input("Enter the ID of the contact you would like to update: "))
-      attribute_to_update = input("Enter the attribute you would like to change: ")
-      value_to_update_to = input("Enter the new value")
-      Contact.list_of_contacts[id_to_update-1].update(attribute_to_update, value_to_update_to)
- 
+    id_to_modify = input("enter the ID of the contact to be modified: ")
+    # contact_to_update = Contact.get(Contact.id == id_to_modify)
+    attribute_to_modify = input("enter the attribute you would like to modify: ")
+    new_value = input("enter the new value: ")
+    if attribute_to_modify == 'first name':
+      q = (Contact.update({Contact.first_name : new_value}).where(Contact.id == id_to_modify))
+      q.execute()
+    elif attribute_to_modify == 'last name':
+      q = (Contact.update({Contact.last_name : new_value}).where(Contact.id == id_to_modify))
+      q.execute()
+    elif attribute_to_modify == 'email':
+      q = (Contact.update({Contact.email : new_value}).where(Contact.id == id_to_modify))
+      q.execute()
   def delete_contact(self):
-    if len(Contact.list_of_contacts) == 0:
-      print("Error, no contacts to delete")
-    else:
-      id_to_delete = int(input("please enter the contact id you would like to delete: "))
-      Contact.delete(id_to_delete-1)
-
+    id_to_delete = int(input('Please enter the ID of the contact you would like to delete: '))
+    contact = Contact.get(Contact.id == id_to_delete)
+    contact.delete_instance()
+    
   def display_all_contacts(self):
-    all_contacts = Contact.all()
-    for item in all_contacts:
-      print(item)
-    print(" ")
-
+    all_contacts = Contact.select()
+    for contact in all_contacts:
+      print("ID: {}, Name: {} {}, Email: {}, Note: {}".format(contact.id, contact.first_name.capitalize(), contact.last_name.capitalize(), contact.email, contact.note))
+  
   def search_by_attribute(self):
-    if len(Contact.list_of_contacts) == 0:
-      print("Error, no contacts to search")
-    else:
-      attribute = input("Enter the attribute you would like to search: ").lower()
-      value = input("Enter the value you would like to search for: ").lower()
-      if attribute == "id":
-        value = int(value)
-      print(Contact.find_by(attribute,value))
-      print(" ")
+    attribute = input('Please enter the attribute you would like to search: ').lower()
+    value = input('Please enter the value you would like to search for: ').capitalize()
+    if attribute == 'first name':
+      result = Contact.get(Contact.first_name == value)
+    elif attribute == 'last name':
+      result = Contact.get(Contact.last_name == value)
+    elif attribute == 'email':
+      result = Contact.get(Contact.email == value)
+    print(result)
 
+    print("ID: {}, Name: {} {}, Email: {}, Note: {}".format(result.id, result.first_name.capitalize(), result.last_name.capitalize(), result.email, result.note))
+    # for contact in result:
+    #   print("ID: {}, Name: {} {}, Email: {}, Note: {}".format(contact.id, contact.first_name.capitalize(), contact.last_name.capitalize(), contact.email, contact.note))
 crm = CRM()
-#crm.main_menu()
+crm.main_menu()
 
 # Contact.create("jj", "ben", 'ff', 'fff')
 # crm.search_by_attribute()
